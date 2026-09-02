@@ -84,17 +84,17 @@ jobs:
           php artisan migrate:fresh --force
           php artisan migrate:status
 
-      - name: Run Laravel quality checks and tests
-        run: |
-          composer run lint:check
-          composer run types:check
-          php artisan test
-
       - name: Run frontend checks and build
         run: |
           npm run check
           npm run types:check
           npm run build
+
+      - name: Run Laravel quality checks and tests
+        run: |
+          composer run lint:check
+          composer run types:check
+          php artisan test
 
       - name: Commit generated dependency locks
         if: github.ref_name == 'foundation-validation'
