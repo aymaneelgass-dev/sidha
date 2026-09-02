@@ -1,0 +1,109 @@
+name: Foundation verification
+
+on:
+  push:
+    branches:
+      - foundation-validation
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: sidha
+          MYSQL_USER: sidha
+          MYSQL_PASSWORD: sidha_ci_password
+          MYSQL_ROOT_PASSWORD: root_ci_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot_ci_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: testing
+      APP_DEBUG: false
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: sidha
+      DB_USERNAME: sidha
+      DB_PASSWORD: sidha_ci_password
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, mbstring, mysql, xml, zip
+          coverage: none
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install PHP dependencies
+        run: |
+          if [ -f composer.lock ]; then
+            composer install --no-interaction --prefer-dist --no-progress
+          else
+            composer update --no-interaction --prefer-dist --no-progress
+          fi
+
+      - name: Install frontend dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Configure Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run MySQL migrations
+        run: |
+          php artisan migrate:fresh --force
+          php artisan migrate:status
+
+      - name: Run frontend checks and build
+        run: |
+          npm run build
+          npm run check
+          npm run types:check
+
+      - name: Run Laravel quality checks and tests
+        run: |
+          composer run lint:check
+          composer run types:check
+          php artisan test
+
+      - name: Commit generated dependency locks
+        if: github.ref_name == 'foundation-validation'
+        run: |
+          git add composer.lock package-lock.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: lock dependencies"
+          git push
