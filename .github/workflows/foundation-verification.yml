@@ -86,9 +86,9 @@ jobs:
 
       - name: Run frontend checks and build
         run: |
+          npm run build
           npm run check
           npm run types:check
-          npm run build
 
       - name: Run Laravel quality checks and tests
         run: |
