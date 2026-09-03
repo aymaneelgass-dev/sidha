@@ -44,18 +44,18 @@ export default function ComingSoon({
             <Head title={pageTitle} />
 
             <main className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-10 sm:px-6">
-                <section className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 text-center shadow-sm sm:p-10">
-                    <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <section className="border-border bg-card w-full max-w-xl rounded-2xl border p-8 text-center shadow-sm sm:p-10">
+                    <div className="bg-primary/10 text-primary mx-auto flex size-14 items-center justify-center rounded-2xl">
                         <ModuleIcon className="size-7" aria-hidden="true" />
                     </div>
 
-                    <p className="mt-6 text-sm font-semibold tracking-wide text-primary uppercase">
+                    <p className="text-primary mt-6 text-sm font-semibold tracking-wide uppercase">
                         Coming soon
                     </p>
-                    <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                    <h1 className="text-foreground mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
                         {pageTitle}
                     </h1>
-                    <p className="mx-auto mt-4 max-w-md text-base leading-7 text-muted-foreground">
+                    <p className="text-muted-foreground mx-auto mt-4 max-w-md text-base leading-7">
                         {pageDescription}
                     </p>
                 </section>
