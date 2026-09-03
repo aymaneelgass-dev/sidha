@@ -46,7 +46,7 @@ export function AppSidebarHeader({
                     )}
                 </div>
 
-                <div className="hidden w-full max-w-sm lg:block">
+                <div className="hidden w-full max-w-sm md:block">
                     <HeaderSearch />
                 </div>
 
@@ -68,7 +68,7 @@ export function AppSidebarHeader({
                 </div>
             </div>
 
-            <div className="pb-3 lg:hidden">
+            <div className="pb-3 md:hidden">
                 <HeaderSearch />
             </div>
         </header>
