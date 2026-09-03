@@ -1,9 +1,18 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    AudioLines,
+    CalendarDays,
+    Clapperboard,
+    LayoutDashboard,
+    Settings,
+    Sparkles,
+    Users,
+    UsersRound,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { SidhaAiCard } from '@/components/shell/sidha-ai-card';
 import {
     Sidebar,
     SidebarContent,
@@ -14,27 +23,24 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as calendar } from '@/routes/calendar';
+import { index as clients } from '@/routes/clients';
+import { edit as editProfile } from '@/routes/profile';
+import { index as projects } from '@/routes/projects';
+import { index as sidhaAi } from '@/routes/sidha-ai';
+import { index as studio } from '@/routes/studio';
+import { index as team } from '@/routes/team';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+    { title: 'Dashboard', href: dashboard(), icon: LayoutDashboard },
+    { title: 'Projects', href: projects(), icon: Clapperboard },
+    { title: 'Studio', href: studio(), icon: AudioLines },
+    { title: 'Clients', href: clients(), icon: UsersRound },
+    { title: 'Calendar', href: calendar(), icon: CalendarDays },
+    { title: 'SIDHA AI', href: sidhaAi(), icon: Sparkles, badge: 'AI' },
+    { title: 'Team', href: team(), icon: Users },
+    { title: 'Settings', href: editProfile(), icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -57,7 +63,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <SidhaAiCard href={sidhaAi()} />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
