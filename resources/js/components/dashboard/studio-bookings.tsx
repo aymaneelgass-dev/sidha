@@ -3,8 +3,8 @@ import { DashboardCard } from '@/components/dashboard/dashboard-card';
 import type { BookingStatus, StudioBooking } from '@/types';
 
 const statusClasses: Record<BookingStatus, string> = {
-    Confirmed: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300',
-    Pending: 'bg-amber-500/12 text-amber-700 dark:text-amber-300',
+    Confirmed: 'bg-chart-3/12 text-chart-3',
+    Pending: 'bg-chart-4/12 text-chart-4',
 };
 
 export function StudioBookings({

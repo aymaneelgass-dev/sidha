@@ -4,8 +4,7 @@ import type { ActiveProject, ProjectStage } from '@/types';
 const stageClasses: Record<ProjectStage, string> = {
     Planning: 'bg-muted text-muted-foreground',
     Production: 'bg-primary/12 text-primary',
-    'Post-production':
-        'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300',
+    'Post-production': 'bg-chart-3/12 text-chart-3',
 };
 
 export function ActiveProjects({
