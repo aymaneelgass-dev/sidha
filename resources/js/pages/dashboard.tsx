@@ -1,25 +1,44 @@
 import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { ActiveProjects } from '@/components/dashboard/active-projects';
+import { BudgetOverviewCard } from '@/components/dashboard/budget-overview';
+import { DashboardKpiCard } from '@/components/dashboard/dashboard-kpi-card';
+import { ProjectStatusChart } from '@/components/dashboard/project-status-chart';
+import { RecentActivityList } from '@/components/dashboard/recent-activity';
+import { RevenueOverview } from '@/components/dashboard/revenue-overview';
+import { StudioBookings } from '@/components/dashboard/studio-bookings';
+import { UpcomingSchedule } from '@/components/dashboard/upcoming-schedule';
+import { dashboardDemoData } from '@/data/dashboard-demo';
 import { dashboard } from '@/routes';
 
 export default function Dashboard() {
     return (
         <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
+            <h1 className="sr-only">Dashboard</h1>
+            <div className="space-y-4 p-4">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {dashboardDemoData.kpis.map((kpi) => (
+                        <DashboardKpiCard key={kpi.id} kpi={kpi} />
+                    ))}
                 </div>
-                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+                <div className="grid min-w-0 gap-4 xl:grid-cols-12">
+                    <RevenueOverview data={dashboardDemoData.revenue} />
+                    <ProjectStatusChart
+                        data={dashboardDemoData.projectStatus}
+                    />
+                    <ActiveProjects
+                        projects={dashboardDemoData.activeProjects}
+                    />
+                    <UpcomingSchedule
+                        items={dashboardDemoData.upcomingSchedule}
+                    />
+                    <StudioBookings
+                        bookings={dashboardDemoData.studioBookings}
+                    />
+                    <RecentActivityList
+                        activities={dashboardDemoData.recentActivity}
+                    />
+                    <BudgetOverviewCard budget={dashboardDemoData.budget} />
                 </div>
             </div>
         </>
@@ -27,6 +46,8 @@ export default function Dashboard() {
 }
 
 Dashboard.layout = {
+    title: 'Dashboard',
+    description: 'Creative production at a glance.',
     breadcrumbs: [
         {
             title: 'Dashboard',
