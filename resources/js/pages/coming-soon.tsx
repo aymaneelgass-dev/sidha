@@ -43,7 +43,7 @@ export default function ComingSoon({
         <>
             <Head title={pageTitle} />
 
-            <main className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-10 sm:px-6">
+            <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-10 sm:px-6">
                 <section className="border-border bg-card w-full max-w-xl rounded-2xl border p-8 text-center shadow-sm sm:p-10">
                     <div className="bg-primary/10 text-primary mx-auto flex size-14 items-center justify-center rounded-2xl">
                         <ModuleIcon className="size-7" aria-hidden="true" />
@@ -59,7 +59,7 @@ export default function ComingSoon({
                         {pageDescription}
                     </p>
                 </section>
-            </main>
+            </div>
         </>
     );
 }
