@@ -15,11 +15,11 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->company(),
+            'name' => 'Example Client '.fake()->unique()->numerify('####'),
             'industry' => fake()->randomElement(['Audiovisual', 'Education', 'Hospitality', 'Technology']),
             'phone' => fake()->numerify('+1 555 01##'),
             'website' => 'https://'.fake()->unique()->slug(2).'.example.test',
-            'address' => fake()->address(),
+            'address' => '123 Example Way',
             'notes' => fake()->sentence(),
             'status' => ClientStatus::Active,
         ];

@@ -16,7 +16,7 @@ class ClientContactFactory extends Factory
     {
         return [
             'client_id' => Client::factory(),
-            'name' => fake()->name(),
+            'name' => 'Contact '.fake()->unique()->numerify('####'),
             'job_title' => fake()->jobTitle(),
             'email' => fake()->unique()->bothify('contact-####@example.test'),
             'phone' => fake()->numerify('+1 555 02##'),

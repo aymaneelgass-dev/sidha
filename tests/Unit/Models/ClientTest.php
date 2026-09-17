@@ -30,4 +30,14 @@ class ClientTest extends TestCase
         $this->assertCount(0, $client->contacts);
         $this->assertNull($client->primaryContact);
     }
+
+    public function test_factories_use_explicitly_fictional_client_and_contact_identity_data(): void
+    {
+        $client = Client::factory()->make();
+        $contact = ClientContact::factory()->make();
+
+        $this->assertMatchesRegularExpression('/^Example Client \d{4}$/', $client->name);
+        $this->assertSame('123 Example Way', $client->address);
+        $this->assertMatchesRegularExpression('/^Contact \d{4}$/', $contact->name);
+    }
 }
