@@ -75,4 +75,42 @@ class MakeAdminCommandTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['email' => 'admin@example.test']);
     }
+
+    public function test_command_handles_a_new_account_persistence_failure_without_disclosing_secrets(): void
+    {
+        $email = 'racing.admin@example.test';
+        $password = 'BootstrapPassword123!';
+        $resetToken = 'known-reset-token-that-must-not-be-disclosed';
+
+        DB::table('password_reset_tokens')->insert([
+            'email' => $email,
+            'token' => $resetToken,
+            'created_at' => now(),
+        ]);
+
+        User::creating(function (User $user): void {
+            DB::table('users')->insert([
+                'name' => 'Concurrent Admin',
+                'email' => $user->email,
+                'email_verified_at' => now(),
+                'password' => 'concurrent-account-hash',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
+
+        $this->artisan('sidha:make-admin', ['email' => $email])
+            ->expectsQuestion('Name', 'Racing Admin')
+            ->expectsQuestion('Password', $password)
+            ->expectsQuestion('Confirm password', $password)
+            ->expectsOutput('Unable to create the administrator account.')
+            ->doesntExpectOutputToContain($password)
+            ->doesntExpectOutputToContain('$2y$')
+            ->doesntExpectOutputToContain($resetToken)
+            ->doesntExpectOutputToContain('/reset-password/')
+            ->doesntExpectOutputToContain('/email/verify/')
+            ->assertFailed();
+
+        $this->assertDatabaseCount('users', 1);
+    }
 }

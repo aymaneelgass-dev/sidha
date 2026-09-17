@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
@@ -81,7 +82,14 @@ class MakeAdminCommand extends Command
             'status' => UserStatus::Active,
         ]);
         $user->forceFill(['email_verified_at' => now()]);
-        $user->save();
+
+        try {
+            $user->save();
+        } catch (QueryException) {
+            $this->error('Unable to create the administrator account.');
+
+            return self::FAILURE;
+        }
 
         $this->info('The active administrator account has been created.');
 
