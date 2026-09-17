@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,9 +55,23 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        Auth::logout();
+        DB::transaction(function () use ($user): void {
+            $activeAdmins = User::query()
+                ->where('role', UserRole::Admin)
+                ->where('status', UserStatus::Active)
+                ->lockForUpdate()
+                ->get(['id']);
 
-        $user->delete();
+            if ($user->isAdmin() && $user->isActive() && count($activeAdmins) === 1) {
+                throw ValidationException::withMessages([
+                    'account' => __('The last active administrator cannot delete their account.'),
+                ]);
+            }
+
+            Auth::logout();
+
+            $user->delete();
+        });
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

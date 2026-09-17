@@ -96,4 +96,41 @@ class ProfileUpdateTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_last_active_admin_cannot_delete_their_profile(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('profile.destroy'), ['password' => 'password'])
+            ->assertSessionHasErrors('account');
+
+        $this->assertNotNull($admin->fresh());
+    }
+
+    public function test_active_admin_can_delete_their_profile_when_another_active_admin_exists(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('profile.destroy'), ['password' => 'password'])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('home'));
+
+        $this->assertGuest();
+        $this->assertNull($admin->fresh());
+    }
+
+    public function test_suspended_admin_does_not_satisfy_the_last_active_admin_guard(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->admin()->suspended()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('profile.destroy'), ['password' => 'password'])
+            ->assertSessionHasErrors('account');
+
+        $this->assertNotNull($admin->fresh());
+    }
 }
