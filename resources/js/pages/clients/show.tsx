@@ -8,6 +8,7 @@ import {
     Phone,
     UserRound,
 } from 'lucide-react';
+import { ClientStatusDialog } from '@/components/clients/client-status-dialog';
 import { ClientStatusBadge } from '@/components/clients/client-status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { index, show } from '@/routes/clients';
+import { archive, edit, index, reactivate, show } from '@/routes/clients';
 import type { ClientDetail } from '@/types/client';
 
 type ClientShowProps = {
@@ -73,7 +74,29 @@ export default function ClientShow({ client, can }: ClientShowProps) {
                         <div
                             data-slot="client-mutation-actions"
                             className="flex shrink-0 flex-wrap items-center gap-2"
-                        />
+                        >
+                            {can.update ? (
+                                <Button variant="outline" asChild>
+                                    <Link href={edit(client.id)}>
+                                        Edit client
+                                    </Link>
+                                </Button>
+                            ) : null}
+                            {client.status === 'archived' && can.reactivate ? (
+                                <ClientStatusDialog
+                                    clientName={client.name}
+                                    action="reactivate"
+                                    submitForm={reactivate.form(client.id)}
+                                />
+                            ) : null}
+                            {client.status !== 'archived' && can.archive ? (
+                                <ClientStatusDialog
+                                    clientName={client.name}
+                                    action="archive"
+                                    submitForm={archive.form(client.id)}
+                                />
+                            ) : null}
+                        </div>
                     ) : null}
                 </div>
 

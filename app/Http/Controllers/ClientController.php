@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Clients\SyncClientContacts;
 use App\Enums\ClientStatus;
 use App\Http\Requests\Clients\ClientIndexRequest;
+use App\Http\Requests\Clients\StoreClientRequest;
+use App\Http\Requests\Clients\UpdateClientRequest;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ClientController extends Controller
 {
+    public function __construct(
+        private readonly SyncClientContacts $syncClientContacts,
+    ) {}
+
     public function index(ClientIndexRequest $request): Response
     {
         Gate::authorize('viewAny', Client::class);
@@ -64,6 +74,42 @@ class ClientController extends Controller
         ]);
     }
 
+    public function create(): Response
+    {
+        Gate::authorize('create', Client::class);
+
+        return Inertia::render('clients/create');
+    }
+
+    public function store(StoreClientRequest $request): RedirectResponse
+    {
+        try {
+            $client = DB::transaction(function () use ($request): Client {
+                $client = Client::create($request->safe()->except('contacts'));
+
+                $this->syncClientContacts->execute(
+                    $client,
+                    $request->validated('contacts', []),
+                );
+
+                return $client;
+            });
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withInput()
+                ->withErrors(['client' => 'The client could not be saved. Please try again.']);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Client created.'),
+        ]);
+
+        return to_route('clients.show', $client);
+    }
+
     public function show(Request $request, Client $client): Response
     {
         Gate::authorize('view', $client);
@@ -71,32 +117,94 @@ class ClientController extends Controller
         $client->load('contacts');
 
         return Inertia::render('clients/show', [
-            'client' => [
-                'id' => $client->id,
-                'name' => $client->name,
-                'industry' => $client->industry,
-                'phone' => $client->phone,
-                'website' => $client->website,
-                'address' => $client->address,
-                'notes' => $client->notes,
-                'status' => $client->status->value,
-                'created_at' => $client->created_at?->toISOString(),
-                'updated_at' => $client->updated_at?->toISOString(),
-                'contacts' => $client->contacts->map(fn ($contact): array => [
-                    'id' => $contact->id,
-                    'name' => $contact->name,
-                    'job_title' => $contact->job_title,
-                    'email' => $contact->email,
-                    'phone' => $contact->phone,
-                    'is_primary' => $contact->is_primary,
-                ])->all(),
-            ],
+            'client' => $this->detailItem($client),
             'can' => [
                 'update' => $request->user()->can('update', $client),
                 'archive' => $request->user()->can('archive', $client),
                 'reactivate' => $request->user()->can('reactivate', $client),
             ],
         ]);
+    }
+
+    public function edit(Client $client): Response
+    {
+        Gate::authorize('update', $client);
+
+        $client->load('contacts');
+
+        return Inertia::render('clients/edit', [
+            'client' => $this->detailItem($client),
+        ]);
+    }
+
+    public function update(UpdateClientRequest $request, Client $client): RedirectResponse
+    {
+        try {
+            DB::transaction(function () use ($request, $client): void {
+                $client->update($request->safe()->except('contacts'));
+                $this->syncClientContacts->execute(
+                    $client,
+                    $request->validated('contacts', []),
+                );
+            });
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withInput()
+                ->withErrors(['client' => 'The client could not be saved. Please try again.']);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Client updated.'),
+        ]);
+
+        return to_route('clients.show', $client);
+    }
+
+    public function archive(Client $client): RedirectResponse
+    {
+        Gate::authorize('archive', $client);
+
+        try {
+            $client->update(['status' => ClientStatus::Archived]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'client_status' => 'The client status could not be updated. Please try again.',
+            ]);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Client archived.'),
+        ]);
+
+        return to_route('clients.show', $client);
+    }
+
+    public function reactivate(Client $client): RedirectResponse
+    {
+        Gate::authorize('reactivate', $client);
+
+        try {
+            $client->update(['status' => ClientStatus::Active]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'client_status' => 'The client status could not be updated. Please try again.',
+            ]);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Client reactivated.'),
+        ]);
+
+        return to_route('clients.show', $client);
     }
 
     /** @return array<string, mixed> */
@@ -116,6 +224,31 @@ class ClientController extends Controller
                 'job_title' => $client->primaryContact->job_title,
                 'is_primary' => $client->primaryContact->is_primary,
             ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function detailItem(Client $client): array
+    {
+        return [
+            'id' => $client->id,
+            'name' => $client->name,
+            'industry' => $client->industry,
+            'phone' => $client->phone,
+            'website' => $client->website,
+            'address' => $client->address,
+            'notes' => $client->notes,
+            'status' => $client->status->value,
+            'created_at' => $client->created_at?->toISOString(),
+            'updated_at' => $client->updated_at?->toISOString(),
+            'contacts' => $client->contacts->map(fn ($contact): array => [
+                'id' => $contact->id,
+                'name' => $contact->name,
+                'job_title' => $contact->job_title,
+                'email' => $contact->email,
+                'phone' => $contact->phone,
+                'is_primary' => $contact->is_primary,
+            ])->all(),
         ];
     }
 }

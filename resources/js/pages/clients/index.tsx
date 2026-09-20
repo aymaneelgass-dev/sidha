@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { Search, UsersRound } from 'lucide-react';
+import { Plus, Search, UsersRound } from 'lucide-react';
 import { ClientList } from '@/components/clients/client-list';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { index } from '@/routes/clients';
+import { create, index } from '@/routes/clients';
 import type {
     ClientCounts,
     ClientFilters,
@@ -68,7 +68,14 @@ export default function ClientIndex({
                             <div
                                 data-slot="client-create-actions"
                                 className="flex shrink-0 items-center gap-2"
-                            />
+                            >
+                                <Button asChild>
+                                    <Link href={create()}>
+                                        <Plus aria-hidden="true" />
+                                        New client
+                                    </Link>
+                                </Button>
+                            </div>
                         ) : null}
                     </div>
 

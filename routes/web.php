@@ -20,8 +20,11 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         'moduleIcon' => 'audio-lines',
     ])->name('studio.index');
 
-    Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
-    Route::get('clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    Route::resource('clients', ClientController::class)->except('destroy');
+    Route::patch('clients/{client}/archive', [ClientController::class, 'archive'])
+        ->name('clients.archive');
+    Route::patch('clients/{client}/reactivate', [ClientController::class, 'reactivate'])
+        ->name('clients.reactivate');
 
     Route::inertia('calendar', 'coming-soon', [
         'pageTitle' => 'Calendar',
