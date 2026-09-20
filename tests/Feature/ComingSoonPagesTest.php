@@ -17,7 +17,6 @@ class ComingSoonPagesTest extends TestCase
         return [
             'projects' => ['projects.index', 'Projects', 'clapperboard'],
             'studio' => ['studio.index', 'Studio', 'audio-lines'],
-            'clients' => ['clients.index', 'Clients', 'users-round'],
             'calendar' => ['calendar.index', 'Calendar', 'calendar-days'],
             'sidha ai' => ['sidha-ai.index', 'SIDHA AI', 'sparkles'],
             'team' => ['team.index', 'Team', 'users'],

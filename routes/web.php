@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -19,11 +20,8 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         'moduleIcon' => 'audio-lines',
     ])->name('studio.index');
 
-    Route::inertia('clients', 'coming-soon', [
-        'pageTitle' => 'Clients',
-        'pageDescription' => 'Keep client relationships and production context organized.',
-        'moduleIcon' => 'users-round',
-    ])->name('clients.index');
+    Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('clients/{client}', [ClientController::class, 'show'])->name('clients.show');
 
     Route::inertia('calendar', 'coming-soon', [
         'pageTitle' => 'Calendar',
