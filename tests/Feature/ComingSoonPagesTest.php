@@ -19,7 +19,6 @@ class ComingSoonPagesTest extends TestCase
             'studio' => ['studio.index', 'Studio', 'audio-lines'],
             'calendar' => ['calendar.index', 'Calendar', 'calendar-days'],
             'sidha ai' => ['sidha-ai.index', 'SIDHA AI', 'sparkles'],
-            'team' => ['team.index', 'Team', 'users'],
         ];
     }
 

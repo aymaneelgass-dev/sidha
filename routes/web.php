@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -38,11 +39,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         'moduleIcon' => 'sparkles',
     ])->name('sidha-ai.index');
 
-    Route::inertia('team', 'coming-soon', [
-        'pageTitle' => 'Team',
-        'pageDescription' => 'Coordinate collaborators, responsibilities, and production roles.',
-        'moduleIcon' => 'users',
-    ])->name('team.index');
+    Route::get('team', [TeamController::class, 'index'])->name('team.index');
 });
 
 require __DIR__.'/settings.php';
