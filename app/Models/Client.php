@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ClientStatus;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * @property ClientStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ClientContact> $contacts
+ * @property-read Collection<int, ClientContact> $contacts
  * @property-read ClientContact|null $primaryContact
  */
 #[Fillable(['name', 'industry', 'phone', 'website', 'address', 'notes', 'status'])]

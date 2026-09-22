@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { Search, UsersRound } from 'lucide-react';
+import { Plus, Search, UsersRound } from 'lucide-react';
 import { TeamList } from '@/components/team/team-list';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { index } from '@/routes/team';
+import { create, index } from '@/routes/team';
 import type {
     PaginatedTeamMembers,
     TeamCounts,
@@ -19,6 +19,7 @@ type TeamIndexProps = {
     counts: TeamCounts;
     can: {
         create: boolean;
+        manage: boolean;
     };
 };
 
@@ -44,6 +45,7 @@ export default function TeamIndex({
     members,
     filters,
     counts,
+    can,
 }: TeamIndexProps) {
     const hasFilters =
         filters.search !== '' || filters.role !== '' || filters.status !== '';
@@ -54,17 +56,27 @@ export default function TeamIndex({
 
             <div className="min-w-0 space-y-5 p-4 md:p-6">
                 <section aria-labelledby="team-directory-heading">
-                    <div className="min-w-0">
-                        <h2
-                            id="team-directory-heading"
-                            className="text-xl font-semibold tracking-tight"
-                        >
-                            Team directory
-                        </h2>
-                        <p className="text-muted-foreground mt-1 text-sm">
-                            Browse colleagues, responsibilities, and account
-                            access.
-                        </p>
+                    <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <h2
+                                id="team-directory-heading"
+                                className="text-xl font-semibold tracking-tight"
+                            >
+                                Team directory
+                            </h2>
+                            <p className="text-muted-foreground mt-1 text-sm">
+                                Browse colleagues, responsibilities, and account
+                                access.
+                            </p>
+                        </div>
+                        {can.create ? (
+                            <Button asChild>
+                                <Link href={create()}>
+                                    <Plus aria-hidden="true" />
+                                    New member
+                                </Link>
+                            </Button>
+                        ) : null}
                     </div>
 
                     <div className="mt-5 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
@@ -191,7 +203,10 @@ export default function TeamIndex({
 
                     {members.data.length > 0 ? (
                         <>
-                            <TeamList members={members.data} />
+                            <TeamList
+                                members={members.data}
+                                canManage={can.manage}
+                            />
 
                             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="text-muted-foreground text-sm">

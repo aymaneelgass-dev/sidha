@@ -40,6 +40,15 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     ])->name('sidha-ai.index');
 
     Route::get('team', [TeamController::class, 'index'])->name('team.index');
+    Route::get('team/create', [TeamController::class, 'create'])->name('team.create');
+    Route::post('team', [TeamController::class, 'store'])->name('team.store');
+    Route::get('team/{member}/edit', [TeamController::class, 'edit'])->name('team.edit');
+    Route::put('team/{member}', [TeamController::class, 'update'])->name('team.update');
+    Route::patch('team/{member}/suspend', [TeamController::class, 'suspend'])->name('team.suspend');
+    Route::patch('team/{member}/reactivate', [TeamController::class, 'reactivate'])->name('team.reactivate');
+    Route::post('team/{member}/resend-password', [TeamController::class, 'resendPassword'])
+        ->middleware('throttle:3,1')
+        ->name('team.resend-password');
 });
 
 require __DIR__.'/settings.php';

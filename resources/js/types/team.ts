@@ -12,6 +12,8 @@ export type TeamMemberListItem = {
     status: TeamMemberStatus;
 };
 
+export type TeamMemberDetail = TeamMemberListItem;
+
 export type TeamFilters = {
     search: string;
     role: TeamMemberRole | '';

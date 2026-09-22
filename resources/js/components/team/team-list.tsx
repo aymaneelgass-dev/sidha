@@ -1,7 +1,10 @@
-import { Mail, Phone } from 'lucide-react';
+import { Form, Link } from '@inertiajs/react';
+import { Mail, Phone, Send } from 'lucide-react';
 import { MemberRoleBadge } from '@/components/team/member-role-badge';
+import { MemberStatusDialog } from '@/components/team/member-status-dialog';
 import { MemberStatusBadge } from '@/components/team/member-status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     Table,
@@ -12,10 +15,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useInitials } from '@/hooks/use-initials';
+import { edit, reactivate, resendPassword, suspend } from '@/routes/team';
 import type { TeamMemberListItem } from '@/types/team';
 
 type TeamListProps = {
     members: readonly TeamMemberListItem[];
+    canManage: boolean;
 };
 
 function MemberIdentity({ member }: { member: TeamMemberListItem }) {
@@ -41,7 +46,56 @@ function MemberIdentity({ member }: { member: TeamMemberListItem }) {
     );
 }
 
-export function TeamList({ members }: TeamListProps) {
+function MemberActions({ member }: { member: TeamMemberListItem }) {
+    return (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button size="sm" variant="outline" asChild>
+                <Link href={edit(member.id)} aria-label={`Edit ${member.name}`}>
+                    Edit
+                </Link>
+            </Button>
+            <Form
+                {...resendPassword.form(member.id)}
+                options={{ preserveScroll: true }}
+                disableWhileProcessing
+            >
+                {({ processing, errors, hasErrors }) => (
+                    <div>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            variant="outline"
+                            disabled={processing}
+                            aria-label={`Resend password setup to ${member.name}`}
+                        >
+                            <Send aria-hidden="true" />
+                            {processing ? 'Sending…' : 'Resend setup'}
+                        </Button>
+                        {hasErrors ? (
+                            <p
+                                role="alert"
+                                className="text-destructive mt-1 max-w-52 text-xs"
+                            >
+                                {Object.values(errors)[0]}
+                            </p>
+                        ) : null}
+                    </div>
+                )}
+            </Form>
+            <MemberStatusDialog
+                memberName={member.name}
+                action={member.status === 'active' ? 'suspend' : 'reactivate'}
+                submitForm={
+                    member.status === 'active'
+                        ? suspend.form(member.id)
+                        : reactivate.form(member.id)
+                }
+            />
+        </div>
+    );
+}
+
+export function TeamList({ members, canManage }: TeamListProps) {
     return (
         <>
             <div className="hidden overflow-hidden rounded-xl border md:block">
@@ -53,6 +107,11 @@ export function TeamList({ members }: TeamListProps) {
                             <TableHead>Phone</TableHead>
                             <TableHead>Role</TableHead>
                             <TableHead>Status</TableHead>
+                            {canManage ? (
+                                <TableHead className="text-right">
+                                    Actions
+                                </TableHead>
+                            ) : null}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -73,6 +132,11 @@ export function TeamList({ members }: TeamListProps) {
                                 <TableCell>
                                     <MemberStatusBadge status={member.status} />
                                 </TableCell>
+                                {canManage ? (
+                                    <TableCell>
+                                        <MemberActions member={member} />
+                                    </TableCell>
+                                ) : null}
                             </TableRow>
                         ))}
                     </TableBody>
@@ -126,6 +190,11 @@ export function TeamList({ members }: TeamListProps) {
                                     </a>
                                 ) : null}
                             </div>
+                            {canManage ? (
+                                <div className="border-border border-t pt-3">
+                                    <MemberActions member={member} />
+                                </div>
+                            ) : null}
                         </CardContent>
                     </Card>
                 ))}
