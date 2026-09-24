@@ -48,6 +48,12 @@ class Client extends Model
             ->orderBy('name');
     }
 
+    /** @return HasMany<Project, $this> */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     /** @return HasOne<ClientContact, $this> */
     public function primaryContact(): HasOne
     {
