@@ -99,12 +99,13 @@ class TeamController extends Controller
         }
 
         $passwordSent = $result['passwordStatus'] === Password::RESET_LINK_SENT;
+        $onboardingSent = $passwordSent && $result['verificationSent'];
 
         Inertia::flash('toast', [
-            'type' => $passwordSent ? 'success' : 'warning',
-            'message' => $passwordSent
+            'type' => $onboardingSent ? 'success' : 'warning',
+            'message' => $onboardingSent
                 ? __('Member created and password setup email sent.')
-                : __('Member created, but the password setup email could not be sent. Use resend to try again.'),
+                : __('Member created, but an onboarding email could not be sent. Use resend for password setup. The member can resend verification after signing in.'),
         ]);
 
         return to_route('team.index');
@@ -159,7 +160,15 @@ class TeamController extends Controller
     {
         Gate::authorize('resendPassword', $member);
 
-        $status = $this->sendMemberPasswordSetup->execute($member);
+        try {
+            $status = $this->sendMemberPasswordSetup->execute($member);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'email' => 'The password setup email could not be sent. Please try again.',
+            ]);
+        }
 
         if ($status !== Password::RESET_LINK_SENT) {
             throw ValidationException::withMessages([

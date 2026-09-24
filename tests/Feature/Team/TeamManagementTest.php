@@ -14,11 +14,49 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class TeamManagementTest extends TestCase
 {
     use RefreshDatabase;
+
+    public static function failedNotifications(): array
+    {
+        return [[VerifyEmail::class], [ResetPassword::class]];
+    }
+
+    #[DataProvider('failedNotifications')]
+    public function test_thrown_onboarding_delivery_failures_retain_account_and_attempt_both_notifications(string $failedNotification): void
+    {
+        $admin = User::factory()->admin()->create();
+        $delivered = [];
+        Notification::shouldReceive('send')->andReturnUsing(function ($notifiables, $notification) use ($failedNotification, &$delivered): void {
+            if ($notification instanceof $failedNotification) {
+                throw new \RuntimeException('Private transport credentials');
+            }
+            $delivered[] = $notification::class;
+        });
+        $email = 'delivery-'.count(User::all()).'@example.test';
+        $this->actingAs($admin)->post(route('team.store'), [
+            'name' => 'Retained Delivery', 'email' => $email, 'role' => 'member',
+        ])->assertRedirect(route('team.index'))
+            ->assertInertiaFlash('toast.type', 'warning')
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('users', ['email' => $email, 'status' => 'active']);
+        $this->assertContains($failedNotification === VerifyEmail::class ? ResetPassword::class : VerifyEmail::class, $delivered);
+    }
+
+    public function test_thrown_resend_delivery_error_returns_generic_feedback(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->member()->create();
+        Notification::shouldReceive('send')->andThrow(new \RuntimeException('Private transport credentials'));
+        $this->actingAs($admin)->from(route('team.index'))
+            ->post(route('team.resend-password', $member))
+            ->assertRedirect(route('team.index'))
+            ->assertSessionHasErrors(['email' => 'The password setup email could not be sent. Please try again.']);
+    }
 
     protected function setUp(): void
     {

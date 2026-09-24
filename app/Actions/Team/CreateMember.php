@@ -6,7 +6,9 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CreateMember
 {
@@ -16,7 +18,7 @@ class CreateMember
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array{member: User, passwordStatus: string}
+     * @return array{member: User, passwordStatus: string, verificationSent: bool}
      */
     public function execute(array $data): array
     {
@@ -27,11 +29,25 @@ class CreateMember
             'email_verified_at' => null,
         ]);
 
-        event(new Registered($member));
+        $verificationSent = true;
+        try {
+            event(new Registered($member));
+        } catch (Throwable $exception) {
+            report($exception);
+            $verificationSent = false;
+        }
+
+        try {
+            $passwordStatus = $this->sendMemberPasswordSetup->execute($member);
+        } catch (Throwable $exception) {
+            report($exception);
+            $passwordStatus = Password::INVALID_USER;
+        }
 
         return [
             'member' => $member,
-            'passwordStatus' => $this->sendMemberPasswordSetup->execute($member),
+            'passwordStatus' => $passwordStatus,
+            'verificationSent' => $verificationSent,
         ];
     }
 }

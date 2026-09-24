@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('industry')->nullable();
             $table->string('phone')->nullable();
-            $table->string('website')->nullable();
+            $table->string('website', 2048)->nullable();
             $table->text('address')->nullable();
             $table->text('notes')->nullable();
             $table->string('status')->default('active')->index();

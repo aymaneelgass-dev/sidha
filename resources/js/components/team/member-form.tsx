@@ -1,4 +1,6 @@
 import { Form, Link } from '@inertiajs/react';
+import type { FormComponentRef } from '@inertiajs/core';
+import { useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -10,6 +12,15 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { index } from '@/routes/team';
 import type { TeamMemberDetail, TeamMemberRole } from '@/types/team';
@@ -22,8 +33,32 @@ type MemberFormProps = {
 };
 
 export function MemberForm({ mode, member, submitForm }: MemberFormProps) {
+    const [role, setRole] = useState(member?.role ?? 'member');
+    const [confirmRole, setConfirmRole] = useState(false);
+    const confirmed = useRef(false);
+    const form = useRef<FormComponentRef>(null);
+    const saveButton = useRef<HTMLButtonElement>(null);
+
     return (
-        <Form {...submitForm} disableWhileProcessing>
+        <Form
+            {...submitForm}
+            ref={form}
+            disableWhileProcessing
+            onBefore={() => {
+                if (
+                    mode === 'edit' &&
+                    member &&
+                    role !== member.role &&
+                    !confirmed.current
+                ) {
+                    setConfirmRole(true);
+                    return false;
+                }
+            }}
+            onFinish={() => {
+                confirmed.current = false;
+            }}
+        >
             {({ processing, errors, hasErrors }) => (
                 <div className="space-y-5">
                     {hasErrors ? (
@@ -98,6 +133,12 @@ export function MemberForm({ mode, member, submitForm }: MemberFormProps) {
                                     id="member-role"
                                     name="role"
                                     defaultValue={member?.role ?? 'member'}
+                                    onChange={(event) =>
+                                        setRole(
+                                            event.target
+                                                .value as TeamMemberRole,
+                                        )
+                                    }
                                     className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px]"
                                     aria-invalid={
                                         errors.role ? true : undefined
@@ -180,7 +221,11 @@ export function MemberForm({ mode, member, submitForm }: MemberFormProps) {
                         <Button variant="outline" asChild>
                             <Link href={index()}>Cancel</Link>
                         </Button>
-                        <Button type="submit" disabled={processing}>
+                        <Button
+                            ref={saveButton}
+                            type="submit"
+                            disabled={processing}
+                        >
                             {processing
                                 ? 'Saving…'
                                 : mode === 'create'
@@ -188,6 +233,42 @@ export function MemberForm({ mode, member, submitForm }: MemberFormProps) {
                                   : 'Save changes'}
                         </Button>
                     </div>
+                    <Dialog open={confirmRole} onOpenChange={setConfirmRole}>
+                        <DialogContent
+                            onCloseAutoFocus={(event) => {
+                                event.preventDefault();
+                                saveButton.current?.focus();
+                            }}
+                        >
+                            <DialogHeader>
+                                <DialogTitle>Change member role?</DialogTitle>
+                                <DialogDescription>
+                                    {role === 'admin'
+                                        ? `${member?.name} will gain Admin access to manage clients and team accounts.`
+                                        : `${member?.name} will lose Admin access and have read-only access to clients and the team directory.`}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="outline">
+                                        Cancel
+                                    </Button>
+                                </DialogClose>
+                                <Button
+                                    type="button"
+                                    disabled={processing}
+                                    onClick={() => {
+                                        if (confirmed.current) return;
+                                        confirmed.current = true;
+                                        setConfirmRole(false);
+                                        form.current?.submit();
+                                    }}
+                                >
+                                    Confirm role change
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             )}
         </Form>
