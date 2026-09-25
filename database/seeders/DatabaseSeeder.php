@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         if (app()->environment(['local', 'testing'])) {
             $this->call(SidhaDemoSeeder::class);
+            $this->call(SidhaPhaseThreeDemoSeeder::class);
         }
     }
 }

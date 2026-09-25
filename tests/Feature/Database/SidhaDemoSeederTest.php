@@ -83,7 +83,8 @@ class SidhaDemoSeederTest extends TestCase
         $this->seed(DatabaseSeeder::class);
 
         $this->assertDatabaseCount('users', 4);
-        $this->assertDatabaseCount('clients', 8);
+        $this->assertDatabaseCount('clients', 12);
+        $this->assertDatabaseCount('projects', 7);
         $this->assertDatabaseCount('client_contacts', 16);
     }
 
