@@ -1,6 +1,6 @@
 # SIDHA Phase 3 — Projects + finance projet simplifiée
 
-Date : 2026-09-24. Statut : proposition à valider, aucune implémentation autorisée.
+Date : 2026-09-24. Statut : design validé par l'utilisateur ; implémentation autorisée.
 Branche : `feat/sidha-phase-3-projects-finance`. Base : `df15886`.
 
 ## Intention et périmètre

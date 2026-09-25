@@ -33,7 +33,7 @@ export function ProjectExpenseDeleteDialog({
                 </Button>
             </DialogTrigger>
             <DialogContent>
-                <DialogHeader>
+                <DialogHeader className="min-w-0">
                     <DialogTitle>Delete expense?</DialogTitle>
                     <DialogDescription className="break-words">
                         “{expense.label}” will be permanently removed. The

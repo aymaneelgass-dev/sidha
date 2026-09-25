@@ -21,7 +21,7 @@ export function ProjectArchiveDialog({ project }: { project: Project }) {
                 <Button variant="outline">Archive</Button>
             </DialogTrigger>
             <DialogContent>
-                <DialogHeader>
+                <DialogHeader className="min-w-0">
                     <DialogTitle>Archive project?</DialogTitle>
                     <DialogDescription className="break-words">
                         {project.reference} — {project.name} will remain
