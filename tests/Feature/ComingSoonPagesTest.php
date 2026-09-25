@@ -15,7 +15,6 @@ class ComingSoonPagesTest extends TestCase
     public static function modules(): array
     {
         return [
-            'projects' => ['projects.index', 'Projects', 'clapperboard'],
             'studio' => ['studio.index', 'Studio', 'audio-lines'],
             'calendar' => ['calendar.index', 'Calendar', 'calendar-days'],
             'sidha ai' => ['sidha-ai.index', 'SIDHA AI', 'sparkles'],

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectExpenseController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,11 +11,13 @@ Route::inertia('/', 'welcome')->name('home');
 Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
-    Route::inertia('projects', 'coming-soon', [
-        'pageTitle' => 'Projects',
-        'pageDescription' => 'Plan, produce, and deliver creative work from one place.',
-        'moduleIcon' => 'clapperboard',
-    ])->name('projects.index');
+    Route::resource('projects', ProjectController::class)->except('destroy');
+    Route::patch('projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
+    Route::scopeBindings()->group(function (): void {
+        Route::post('projects/{project}/expenses', [ProjectExpenseController::class, 'store'])->name('projects.expenses.store');
+        Route::put('projects/{project}/expenses/{expense}', [ProjectExpenseController::class, 'update'])->name('projects.expenses.update');
+        Route::delete('projects/{project}/expenses/{expense}', [ProjectExpenseController::class, 'destroy'])->name('projects.expenses.destroy');
+    });
 
     Route::inertia('studio', 'coming-soon', [
         'pageTitle' => 'Studio',
