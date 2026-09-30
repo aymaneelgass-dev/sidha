@@ -5,6 +5,8 @@ import { ProjectFinancialSummary } from '@/components/projects/project-financial
 import { ProjectExpenseList } from '@/components/projects/project-expense-list';
 import { ProjectWorkflow } from '@/components/projects/project-workflow';
 import { ProjectFacts } from '@/components/projects/project-facts';
+import { ProductionDesk } from '@/components/projects/production-desk';
+import type { ProductionPlan } from '@/types/production-plan';
 import { projectTypes } from '@/types/project';
 import { index, edit } from '@/routes/projects';
 import type {
@@ -18,9 +20,16 @@ export default function ProjectShow({
     can,
     financials,
     expenses,
+    productionPlan,
 }: {
     project: Project;
-    can: { update: boolean; archive: boolean; manageExpenses: boolean };
+    can: {
+        update: boolean;
+        archive: boolean;
+        manageExpenses: boolean;
+        generatePlan: boolean;
+    };
+    productionPlan: ProductionPlan | null;
     financials: ProjectFinancials;
     expenses: PaginatedProp<ProjectExpense>;
 }) {
@@ -87,6 +96,11 @@ export default function ProjectShow({
                         {project.brief ?? 'No brief added yet.'}
                     </p>
                 </section>
+                <ProductionDesk
+                    project={project}
+                    plan={productionPlan}
+                    canGenerate={can.generatePlan}
+                />
                 <ProjectExpenseList
                     projectId={project.id}
                     expenses={expenses}

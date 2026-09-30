@@ -63,15 +63,23 @@ class ProjectController extends Controller
     public function show(Request $request, Project $project): Response
     {
         Gate::authorize('view', $project);
-        $project->load('client:id,name');
+        $project->load('client:id,name', 'productionPlan');
 
         return Inertia::render('projects/show', [
             'project' => $this->projectData($project),
+            'productionPlan' => $project->productionPlan ? [
+                'id' => $project->productionPlan->id,
+                'content' => $project->productionPlan->content,
+                'provider' => $project->productionPlan->provider,
+                'model' => $project->productionPlan->model,
+                'generated_at' => $project->productionPlan->generated_at->toISOString(),
+                'updated_at' => $project->productionPlan->updated_at->toISOString(),
+            ] : null,
             'financials' => app(CalculateProjectFinancials::class)->execute($project),
             'expenses' => $project->expenses()->orderByRaw('expense_date IS NULL')->orderByDesc('expense_date')->orderByDesc('id')->paginate(15)->withQueryString()->through(fn (ProjectExpense $expense): array => [
                 'id' => $expense->id, 'label' => $expense->label, 'amount' => $expense->amount, 'expense_date' => $expense->expense_date?->format('Y-m-d'), 'notes' => $expense->notes,
             ]),
-            'can' => ['update' => $request->user()->can('update', $project), 'archive' => $request->user()->can('archive', $project), 'manageExpenses' => $request->user()->can('create', ProjectExpense::class)],
+            'can' => ['update' => $request->user()->can('update', $project), 'archive' => $request->user()->can('archive', $project), 'manageExpenses' => $request->user()->can('create', ProjectExpense::class), 'generatePlan' => $request->user()->can('generatePlan', $project)],
         ]);
     }
 

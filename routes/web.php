@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProductionPlanController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectExpenseController;
 use App\Http\Controllers\StudioBookingController;
@@ -13,6 +14,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
     Route::resource('projects', ProjectController::class)->except('destroy');
+    Route::post('projects/{project}/production-plan', [ProductionPlanController::class, 'store'])->middleware('throttle:10,1')->name('projects.production-plan.store');
     Route::patch('projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
     Route::scopeBindings()->group(function (): void {
         Route::post('projects/{project}/expenses', [ProjectExpenseController::class, 'store'])->name('projects.expenses.store');

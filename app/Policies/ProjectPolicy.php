@@ -7,6 +7,11 @@ use App\Models\User;
 
 class ProjectPolicy
 {
+    public function generatePlan(User $user, Project $record): bool
+    {
+        return $user->isActive() && $user->isAdmin();
+    }
+
     public function viewAny(User $user): bool
     {
         return $user->isActive();
