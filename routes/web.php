@@ -3,6 +3,7 @@
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectExpenseController;
+use App\Http\Controllers\StudioBookingController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,11 +20,8 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         Route::delete('projects/{project}/expenses/{expense}', [ProjectExpenseController::class, 'destroy'])->name('projects.expenses.destroy');
     });
 
-    Route::inertia('studio', 'coming-soon', [
-        'pageTitle' => 'Studio',
-        'pageDescription' => 'Coordinate recording spaces, sessions, and studio resources.',
-        'moduleIcon' => 'audio-lines',
-    ])->name('studio.index');
+    Route::resource('studio', StudioBookingController::class)->parameters(['studio' => 'booking'])->except('destroy');
+    Route::patch('studio/{booking}/cancel', [StudioBookingController::class, 'cancel'])->name('studio.cancel');
 
     Route::resource('clients', ClientController::class)->except('destroy');
     Route::patch('clients/{client}/archive', [ClientController::class, 'archive'])

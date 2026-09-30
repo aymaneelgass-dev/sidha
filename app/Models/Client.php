@@ -54,6 +54,12 @@ class Client extends Model
         return $this->hasMany(Project::class);
     }
 
+    /** @return HasMany<StudioBooking, $this> */
+    public function studioBookings(): HasMany
+    {
+        return $this->hasMany(StudioBooking::class);
+    }
+
     /** @return HasOne<ClientContact, $this> */
     public function primaryContact(): HasOne
     {
