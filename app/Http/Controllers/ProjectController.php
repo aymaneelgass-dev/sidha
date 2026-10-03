@@ -67,6 +67,7 @@ class ProjectController extends Controller
 
         return Inertia::render('projects/show', [
             'project' => $this->projectData($project),
+            'aiProvider' => config('services.ai_provider', 'openai'),
             'productionPlan' => $project->productionPlan ? [
                 'id' => $project->productionPlan->id,
                 'content' => $project->productionPlan->content,

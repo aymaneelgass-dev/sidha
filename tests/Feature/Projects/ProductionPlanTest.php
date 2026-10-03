@@ -5,6 +5,8 @@ namespace Tests\Feature\Projects;
 use App\Models\ProductionPlan;
 use App\Models\Project;
 use App\Models\User;
+use App\Services\ProductionPlanner;
+use App\Services\ProductionPlanSchema;
 use Database\Seeders\SidhaPhaseFiveDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
@@ -23,7 +25,7 @@ class ProductionPlanTest extends TestCase
         parent::setUp();
         $this->withoutVite();
         Http::preventStrayRequests();
-        config(['services.openai.key' => 'test-key-not-real', 'services.openai.model' => 'gpt-5-mini']);
+        config(['services.ai_provider' => 'openai', 'services.openai.key' => 'test-key-not-real', 'services.openai.model' => 'gpt-5-mini']);
         $this->actingAs(User::factory()->admin()->create());
     }
 
@@ -88,6 +90,31 @@ class ProductionPlanTest extends TestCase
             && str_contains($r['input'], $project->client->name));
         $this->get(route('projects.show', $project))->assertInertia(fn (Assert $page) => $page
             ->component('projects/show')->where('productionPlan.content.objective', $this->content()['objective'])->where('can.generatePlan', true));
+    }
+
+    public function test_demo_generates_a_valid_persisted_plan_without_key_or_http_requests(): void
+    {
+        config(['services.ai_provider' => 'demo', 'services.openai.key' => null]);
+        $project = $this->project();
+        $this->get(route('projects.show', $project))->assertInertia(fn (Assert $page) => $page
+            ->component('projects/show')->where('aiProvider', 'demo'));
+
+        $this->post($this->url($project))->assertRedirect(route('projects.show', $project))->assertSessionHasNoErrors();
+
+        $plan = ProductionPlan::sole();
+        $this->assertSame('demo', $plan->provider);
+        $this->assertSame('demo', $plan->model);
+        $this->assertNull($plan->response_id);
+        $this->assertNotNull($plan->generated_at);
+        $this->assertSame($plan->content, app(ProductionPlanSchema::class)->validate($plan->content));
+        $this->assertSame(['objective', 'creative_concept', 'script', 'shot_list', 'voice_over', 'production_checklist'], array_keys($plan->content));
+        $this->assertStringContainsString($project->name, $plan->content['objective']);
+        $this->assertStringContainsString($project->client->name, $plan->content['objective']);
+        $this->assertStringContainsString($project->brief, $plan->content['creative_concept']);
+        $this->assertSame($plan->content, app(ProductionPlanner::class)->generate($project, true, $plan->updated_at->toISOString())->content);
+        Http::assertNothingSent();
+        $this->get(route('projects.show', $project))->assertInertia(fn (Assert $page) => $page
+            ->component('projects/show')->where('productionPlan.provider', 'demo'));
     }
 
     public function test_member_can_read_but_cannot_generate_or_replace(): void

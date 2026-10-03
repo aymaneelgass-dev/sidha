@@ -21,6 +21,7 @@ export default function ProjectShow({
     financials,
     expenses,
     productionPlan,
+    aiProvider,
 }: {
     project: Project;
     can: {
@@ -30,6 +31,7 @@ export default function ProjectShow({
         generatePlan: boolean;
     };
     productionPlan: ProductionPlan | null;
+    aiProvider: string;
     financials: ProjectFinancials;
     expenses: PaginatedProp<ProjectExpense>;
 }) {
@@ -99,6 +101,7 @@ export default function ProjectShow({
                 <ProductionDesk
                     project={project}
                     plan={productionPlan}
+                    aiProvider={aiProvider}
                     canGenerate={can.generatePlan}
                 />
                 <ProjectExpenseList

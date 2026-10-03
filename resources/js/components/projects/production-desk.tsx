@@ -48,10 +48,12 @@ function SectionLabel({
 export function ProductionDesk({
     project,
     plan,
+    aiProvider,
     canGenerate,
 }: {
     project: Project;
     plan: ProductionPlan | null;
+    aiProvider: string;
     canGenerate: boolean;
 }) {
     const [open, setOpen] = useState(false);
@@ -198,6 +200,11 @@ export function ProductionDesk({
                             ? 'A working direction for your next production. Review with your team and client before the shoot.'
                             : 'Turn this project’s creative brief into a practical concept, script and shooting plan.'}
                     </p>
+                    {aiProvider === 'demo' && (
+                        <p className="text-muted-foreground mt-2 text-xs">
+                            Demo mode  simulated AI output
+                        </p>
+                    )}
                 </div>
                 {action}
             </div>
@@ -285,7 +292,7 @@ function Treatment({
                 </span>
                 <span>
                     {demo
-                        ? 'Fictional demo · No OpenAI call'
+                        ? 'Demo mode  simulated AI output'
                         : 'OpenAI · Saved'}{' '}
                     ·{' '}
                     <time dateTime={plan.generated_at}>

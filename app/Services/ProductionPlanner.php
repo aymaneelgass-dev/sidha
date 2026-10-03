@@ -13,7 +13,7 @@ use JsonException;
 
 class ProductionPlanner
 {
-    public function __construct(private ProductionPlanSchema $schema) {}
+    public function __construct(private ProductionPlanSchema $schema, private DemoProductionPlanProvider $demo) {}
 
     public function generate(Project $project, bool $replace, ?string $expectedUpdatedAt): ProductionPlan
     {
@@ -26,19 +26,26 @@ class ProductionPlanner
             if (trim($project->brief ?? '') === '') {
                 $this->fail('Add a creative brief to this project before generating its production plan.');
             }
-            $key = trim((string) config('services.openai.key'));
-            $model = trim((string) config('services.openai.model'));
-            if ($key === '' || $model === '') {
-                $this->fail('AI Planner is not configured. Ask your administrator to configure OpenAI. Your saved plan is unchanged.');
+            $provider = config('services.ai_provider', 'openai');
+            if ($provider === 'demo') {
+                $result = $this->demo->generate($project);
+            } elseif ($provider === 'openai') {
+                $key = trim((string) config('services.openai.key'));
+                $model = trim((string) config('services.openai.model'));
+                if ($key === '' || $model === '') {
+                    $this->fail('AI Planner is not configured. Ask your administrator to configure OpenAI. Your saved plan is unchanged.');
+                }
+                $result = $this->request($project, $key, $model);
+            } else {
+                $this->fail('AI Planner provider is not configured. Your saved plan is unchanged.');
             }
-            $result = $this->request($project, $key, $model);
 
-            return DB::transaction(function () use ($project, $replace, $expectedUpdatedAt, $result): ProductionPlan {
+            return DB::transaction(function () use ($project, $replace, $expectedUpdatedAt, $result, $provider): ProductionPlan {
                 Project::query()->whereKey($project->id)->lockForUpdate()->firstOrFail();
                 $plan = $project->productionPlan()->first();
                 $this->checkRevision($plan, $replace, $expectedUpdatedAt);
                 $plan ??= new ProductionPlan(['project_id' => $project->id]);
-                $plan->fill($result + ['provider' => 'openai', 'generated_at' => now()]);
+                $plan->fill($result + ['provider' => $provider, 'generated_at' => now()]);
                 $plan->save();
 
                 return $plan;
