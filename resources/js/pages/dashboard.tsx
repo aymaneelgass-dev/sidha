@@ -14,8 +14,12 @@ export default function Dashboard() {
     return (
         <>
             <Head title="Dashboard" />
-            <h1 className="sr-only">Dashboard</h1>
             <div className="space-y-4 p-4">
+                <p className="border-primary bg-card text-muted-foreground border-l-2 px-4 py-3 text-sm leading-6">
+                    Illustrative dashboard preview. Figures, projects and
+                    activity here are fictional samples and do not reflect saved
+                    SIDHA records.
+                </p>
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {dashboardDemoData.kpis.map((kpi) => (
                         <DashboardKpiCard key={kpi.id} kpi={kpi} />
@@ -47,7 +51,7 @@ export default function Dashboard() {
 
 Dashboard.layout = {
     title: 'Dashboard',
-    description: 'Creative production at a glance.',
+    description: 'Illustrative production overview.',
     breadcrumbs: [
         {
             title: 'Dashboard',

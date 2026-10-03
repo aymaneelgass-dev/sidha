@@ -9,15 +9,15 @@ export function SidhaAiCard({ href }: SidhaAiCardProps) {
     return (
         <div className="sidha-surface-glow border-sidebar-border bg-sidebar-accent/50 rounded-xl border p-3 group-data-[collapsible=icon]:hidden">
             <Sparkles className="text-primary mb-3 size-5" aria-hidden="true" />
-            <p className="text-sm font-medium">Create faster with SIDHA AI</p>
+            <p className="text-sm font-medium">AI Production Planner</p>
             <p className="text-sidebar-foreground/60 mt-1 text-xs">
-                Your creative production assistant is coming soon.
+                Build a production treatment from a saved project brief.
             </p>
             <Link
                 href={href}
                 className="bg-primary text-primary-foreground mt-3 inline-flex h-8 w-full items-center justify-center rounded-lg text-xs font-semibold"
             >
-                Open SIDHA AI
+                Browse projects
             </Link>
         </div>
     );

@@ -52,9 +52,9 @@ export default function ComingSoon({
                     <p className="text-primary mt-6 text-sm font-semibold tracking-wide uppercase">
                         Coming soon
                     </p>
-                    <h1 className="text-foreground mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                    <h2 className="text-foreground mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
                         {pageTitle}
-                    </h1>
+                    </h2>
                     <p className="text-muted-foreground mx-auto mt-4 max-w-md text-base leading-7">
                         {pageDescription}
                     </p>

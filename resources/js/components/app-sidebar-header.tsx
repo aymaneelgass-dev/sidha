@@ -1,8 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { Bell } from 'lucide-react';
 import { AppearanceMenu } from '@/components/shell/appearance-menu';
-import { HeaderSearch } from '@/components/shell/header-search';
-import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
@@ -46,30 +43,9 @@ export function AppSidebarHeader({
                     )}
                 </div>
 
-                <div className="hidden w-full max-w-sm md:block">
-                    <HeaderSearch />
-                </div>
-
                 <div className="flex shrink-0 items-center gap-1">
                     <AppearanceMenu />
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        aria-label="Notifications"
-                        className="relative"
-                    >
-                        <Bell aria-hidden="true" />
-                        <span
-                            className="bg-primary absolute top-2 right-2 size-1.5 rounded-full"
-                            aria-hidden="true"
-                        />
-                    </Button>
                 </div>
-            </div>
-
-            <div className="pb-3 md:hidden">
-                <HeaderSearch />
             </div>
         </header>
     );

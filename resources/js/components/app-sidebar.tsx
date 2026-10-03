@@ -63,7 +63,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <SidhaAiCard href={sidhaAi()} />
+                <SidhaAiCard href={projects()} />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
