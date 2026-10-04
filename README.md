@@ -1,27 +1,42 @@
-# Laravel + React Starter Kit
+# SIDHA
 
-## Introduction
+SIDHA is an internal creative production workspace built with Laravel, Inertia, React and MySQL. The implemented paths are Dashboard, Clients, Team, Projects with project expenses, Studio bookings, and the AI Production Planner on Project Detail. Calendar and the broader SIDHA AI page are explicitly marked as future areas.
 
-Our React starter kit provides a robust, modern starting point for building Laravel applications with a React frontend using [Inertia](https://inertiajs.com).
+## Local setup
 
-Inertia allows you to build modern, single-page React applications using classic server-side routing and controllers. This lets you enjoy the frontend power of React combined with the incredible backend productivity of Laravel and lightning-fast Vite compilation.
+1. Copy `.env.example` to `.env` and set the local MySQL connection and `APP_KEY`. Keep `.env` untracked.
+2. Run `composer install` and `npm install` if dependencies are not installed.
+3. Run `php artisan migrate` to apply outstanding migrations without replacing existing data.
+4. Run `npm run build`, then `php artisan serve` to open the application.
+5. Sign in with an existing Admin account. Admin can manage records and generate plans; Member can read the main modules but cannot change business records.
 
-This React starter kit utilizes React 19, TypeScript, Tailwind, and the [shadcn/ui](https://ui.shadcn.com) and [radix-ui](https://www.radix-ui.com) component libraries.
+The Dashboard contains a clearly labeled **illustrative preview**. Its figures and activity are fictional samples, separate from saved MySQL records. Use Clients, Projects, Project Detail, and Studio to demonstrate persisted data.
 
-## Official Documentation
+## Fictional demonstration data
 
-Documentation for all Laravel starter kits can be found on the [Laravel website](https://laravel.com/docs/starter-kits).
+These optional seeders run only in local/testing, use fictional `.test` clients, and preserve their existing demo groups when rerun:
 
-## Contributing
+```sh
+php artisan db:seed --class=SidhaPhaseThreeDemoSeeder
+php artisan db:seed --class=SidhaPhaseFourDemoSeeder
+php artisan db:seed --class=SidhaPhaseFiveDemoSeeder
+```
 
-Thank you for considering contributing to our starter kit! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Phase 3 adds projects and expenses; Phase 4 adds studio bookings; Phase 5 adds a handwritten Production Plan labeled as demo content. Review the current database before seeding. Do not run `migrate:fresh` against an existing installation.
 
-All contributions to the Starter Kits from now on should be made through [Maestro](https://github.com/laravel/maestro).
+## AI Production Planner
 
-## Code of Conduct
+Set `OPENAI_API_KEY` only in the server's untracked `.env`. `OPENAI_MODEL` is optional and defaults to `gpt-5-mini`. After changing configuration, run `php artisan config:clear`. In SIDHA, an Admin opens a project with a creative brief and selects **Generate Production Plan**. Regeneration requires confirmation and replaces the saved plan; failed requests preserve it. A real generation calls OpenAI and may incur cost. The key never belongs in frontend code or Git.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+See [Phase 5 documentation](docs/phase-5-ai-production-planner.md) for the request format, validation and safeguards.
 
-## License
+## Quality checks
 
-The Laravel + React starter kit is open-sourced software licensed under the MIT license.
+```sh
+php artisan test
+php vendor/bin/pint --test
+php vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+npm run types:check
+npm run check
+npm run build
+```
