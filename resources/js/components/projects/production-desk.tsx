@@ -202,7 +202,7 @@ export function ProductionDesk({
                     </p>
                     {aiProvider === 'demo' && (
                         <p className="text-muted-foreground mt-2 text-xs">
-                            Demo mode  simulated AI output
+                            Demo mode simulated AI output
                         </p>
                     )}
                 </div>
@@ -291,9 +291,7 @@ function Treatment({
                     {project.reference} / PRODUCTION DESK
                 </span>
                 <span>
-                    {demo
-                        ? 'Demo mode  simulated AI output'
-                        : 'OpenAI · Saved'}{' '}
+                    {demo ? 'Demo mode  simulated AI output' : 'OpenAI · Saved'}{' '}
                     ·{' '}
                     <time dateTime={plan.generated_at}>
                         {new Intl.DateTimeFormat('en', {
