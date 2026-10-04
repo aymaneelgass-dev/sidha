@@ -189,7 +189,7 @@ class ClientReadTest extends TestCase
 
         $clientQueries = collect(DB::getQueryLog())
             ->pluck('query')
-            ->filter(fn (string $query) => str_contains($query, 'from "client'));
+            ->filter(fn (string $query) => preg_match('/\bfrom\s+[`"]client/', $query) === 1);
 
         DB::disableQueryLog();
 

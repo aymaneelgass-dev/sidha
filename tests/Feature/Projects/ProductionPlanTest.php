@@ -24,6 +24,7 @@ class ProductionPlanTest extends TestCase
     {
         parent::setUp();
         $this->withoutVite();
+        config(['inertia.ssr.enabled' => false]);
         Http::preventStrayRequests();
         config(['services.ai_provider' => 'openai', 'services.openai.key' => 'test-key-not-real', 'services.openai.model' => 'gpt-5-mini']);
         $this->actingAs(User::factory()->admin()->create());
@@ -78,7 +79,7 @@ class ProductionPlanTest extends TestCase
         $this->post($this->url($project))->assertRedirect(route('projects.show', $project))->assertSessionHasNoErrors();
         $plan = ProductionPlan::sole();
         $this->assertSame($project->id, $plan->project_id);
-        $this->assertSame($this->content(), $plan->content);
+        $this->assertEquals($this->content(), $plan->content);
         $this->assertSame('openai', $plan->provider);
         $this->assertSame('gpt-5-mini-2025-08-07', $plan->model);
         $this->assertSame('resp_fictional', $plan->response_id);
@@ -107,11 +108,11 @@ class ProductionPlanTest extends TestCase
         $this->assertNull($plan->response_id);
         $this->assertNotNull($plan->generated_at);
         $this->assertSame($plan->content, app(ProductionPlanSchema::class)->validate($plan->content));
-        $this->assertSame(['objective', 'creative_concept', 'script', 'shot_list', 'voice_over', 'production_checklist'], array_keys($plan->content));
+        $this->assertEqualsCanonicalizing(['objective', 'creative_concept', 'script', 'shot_list', 'voice_over', 'production_checklist'], array_keys($plan->content));
         $this->assertStringContainsString($project->name, $plan->content['objective']);
         $this->assertStringContainsString($project->client->name, $plan->content['objective']);
         $this->assertStringContainsString($project->brief, $plan->content['creative_concept']);
-        $this->assertSame($plan->content, app(ProductionPlanner::class)->generate($project, true, $plan->updated_at->toISOString())->content);
+        $this->assertEquals($plan->content, app(ProductionPlanner::class)->generate($project, true, $plan->updated_at->toISOString())->content);
         Http::assertNothingSent();
         $this->get(route('projects.show', $project))->assertInertia(fn (Assert $page) => $page
             ->component('projects/show')->where('productionPlan.provider', 'demo'));

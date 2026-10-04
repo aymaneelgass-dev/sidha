@@ -24,17 +24,18 @@ class ProjectReadTest extends TestCase
     {
         $project = Project::factory()->create();
         $this->actingAs(User::factory()->member()->create())->get('/projects')->assertOk()->assertInertia(fn (Assert $p) => $p->component('projects/index')->has('projects.data', 1)->where('can.create', false));
-        $this->get("/projects/{$project->id}")->assertOk()->assertInertia(fn (Assert $p) => $p->component('projects/show')->where('project.reference', 'SID-001')->where('can.update', false));
+        $this->get("/projects/{$project->id}")->assertOk()->assertInertia(fn (Assert $p) => $p->component('projects/show')->where('project.reference', $project->reference)->where('can.update', false));
     }
 
     public function test_filters_search_and_pagination_are_combined_and_preserved(): void
     {
         $client = Client::factory()->create(['name' => 'Fictional Beacon']);
-        Project::factory()->count(16)->for($client)->create(['name' => 'Night film', 'status' => 'production']);
+        $projects = Project::factory()->count(16)->for($client)->create(['name' => 'Night film', 'status' => 'production']);
         Project::factory()->create(['status' => 'archived', 'type' => 'corporate']);
         $this->actingAs(User::factory()->member()->create());
         $this->get('/projects?search=Beacon&status=production&type=music-video')->assertInertia(fn (Assert $p) => $p->has('projects.data', 15)->where('projects.total', 16)->where('filters.search', 'Beacon')->where('projects.next_page_url', fn ($url) => str_contains($url, 'status=production') && str_contains($url, 'search=Beacon')));
-        $this->get('/projects?search=SID-001')->assertInertia(fn (Assert $p) => $p->has('projects.data', 1)->where('projects.data.0.id', 1));
+        $project = $projects->first();
+        $this->get('/projects?search='.$project->reference)->assertInertia(fn (Assert $p) => $p->has('projects.data', 1)->where('projects.data.0.id', $project->id));
         $this->get('/projects?status=archived')->assertInertia(fn (Assert $p) => $p->has('projects.data', 1));
     }
 
